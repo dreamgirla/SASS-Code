@@ -1,0 +1,463 @@
+$brand-primary : darken(#428bca, 6.5%) !default; // #337ab7
+$btn-primary-color: #fff !default;
+$btn-primary-bg : $brand-primary !default;
+$btn-primary-border : darken($btn-primary-bg, 5%) !default;
+
+.btn-primary {
+   background-color: $btn-primary-bg;
+   color: $btn-primary-color;
+   border: 1px solid $btn-primary-border;
+}
+/*定义全局变量(在选择器、函数、混合宏...的外面定义的变量为全局变量)*/
+
+$color: orange !default;
+.block {
+  color: $color;//调用全局变量
+}
+em {
+  $color: red;//定义局部变量
+  a {
+    color: $color;//调用局部变量
+  }
+}
+span {
+  color: $color;//调用全局变量
+}
+
+/*选择器嵌套*/
+
+nav {
+  a {
+    color: red;
+
+    header & {
+      color:green;
+    }
+  }  
+}
+
+/*属性嵌套*/
+
+.box_01 {
+  border: {
+   top: 1px solid red;
+   bottom: 1px solid green;
+  }
+  width:100px;
+  height:100px;
+}
+
+/*伪元素嵌套*/
+
+.clearfix{
+&:before,
+&:after {
+    content:"";
+    display: table;
+  }
+&:after {
+    clear:both;
+    overflow: hidden;
+  }
+}
+
+/*声明混合宏 @mixin 是用来声明混合宏的关键词*/
+
+@mixin border-radius{
+    -webkit-border-radius: 5px;
+    border-radius: 5px;
+}
+button {
+    @include border-radius;
+}
+
+/*不带参数混合宏*/
+
+@mixin border-radius($radius){
+  -webkit-border-radius: $radius;
+  border-radius: $radius;
+}
+.box_02 {
+	width:100px;
+	height:100px;
+	background-color:yellow;
+  @include border-radius(3px);
+}
+
+/*带参数混合宏*/
+
+@mixin border-radius($radius:6px){
+    -webkit-border-radius: $radius;
+    border-radius: $radius;
+}
+.btn {
+  @include border-radius;
+}
+
+
+/*[Sass]混合宏的参数--传多个参数*/
+
+@mixin center($width,$height){
+  width: $width;
+  height: $height;
+  position: absolute;
+  background-color:red;
+  top: 50%;
+  left: 50%;
+  margin-top: -($height) / 2;
+  margin-left: -($width) / 2;
+}
+.box-center {
+  @include center(500px,300px);
+}
+
+/*继承*/
+
+.btn {
+  border: 1px solid #ccc;
+  padding: 6px 10px;
+  font-size: 14px;
+}
+
+.btn-primary {
+  background-color: #f36;
+  color: #fff;
+  @extend .btn;
+}
+
+.btn-second {
+  background-color: orange;
+  color: #fff;
+  @extend .btn;
+}
+
+/*%placecholder占位符*/
+/*不被@extend调用的话，不会产生代码*/
+
+%mt5 {
+  margin-top: 5px;
+}
+%pt5{
+  padding-top: 5px;
+}
+
+/*被@extend调用，产生代码*/
+
+.btn {
+  @extend %mt5;
+  @extend %pt5;
+}
+
+.block {
+  @extend %mt5;
+
+  span {
+    @extend %pt5;
+  }
+}
+
+$properties: (margin, padding);
+@mixin set-value($side, $value) {
+    @each $prop in $properties {
+        #{$prop}-#{$side}: $value;
+    }
+}
+.login-box {
+    @include set-value(top, 14px);
+}
+
+/*当你想设置属性值的时候你可以使用字符串插入进来。另一个有用的用法是构建一个选择器。*/
+
+@mixin generate-sizes($class, $small, $medium, $big) {
+    .#{$class}-small { font-size: $small; }
+    .#{$class}-medium { font-size: $medium; }
+    .#{$class}-big { font-size: $big; }
+}
+@include generate-sizes("header-text", 12px, 20px, 40px);
+
+
+/*可以动态的插入 .class 和 %placeholder。当然他们不能接受像 mixin 这样的参数*/
+
+%updated-status {
+    margin-top: 20px;
+    background: #F00;
+}
+.selected-status {
+    font-weight: bold;
+}
+$flag: "status";
+.navigation {
+    @extend %updated-#{$flag};
+    @extend .selected-#{$flag};
+}
+
+
+/*除法运算*/
+
+p {
+  font: 10px/8px;             // 纯 CSS，不是除法运算
+  $width: 1000px;
+  width: $width/2;            // 使用了变量，是除法运算
+  width: round(1.5)/2;        // 使用了函数，是除法运算
+  height: (500px/2);          // 使用了圆括号，是除法运算
+  margin-left: 5px + 8px/2px; // 使用了加（+）号，是除法运算
+  width: (1000px / 100px);	  // 除法运算之后会得到一个不带单位的数值
+}
+
+/*变量计算*/
+
+$content-width: 720px;
+$sidebar-width: 220px;
+$gutter: 20px;
+
+.container {
+  width: $content-width + $sidebar-width + $gutter;
+  margin: 0 auto;
+}
+
+/*颜色计算 计算公式为 01 + 04 = 05、02 + 05 = 07 和 03 + 06 = 09*/
+
+p {
+  color: #010203 + #040506;
+}
+
+/*字符运算*/
+
+$content: "Hello" + "" + "Sass!";
+.box:before {
+  content: " #{$content} ";
+}
+
+div {
+  cursor: e + -resize;
+}
+
+p:before {
+  content: "Foo " + Bar;
+  font-family: sans- + "serif";
+}
+
+/*@if @else*/
+@mixin blockOrHidden($boolean:true) {
+  @if $boolean {
+      @debug "$boolean is #{$boolean}";
+      display: block;
+    }
+  @else {
+      @debug "$boolean is #{$boolean}";
+      display: none;
+    }
+}
+
+.block {
+  @include blockOrHidden;
+}
+
+.hidden{
+  @include blockOrHidden(false);
+}
+
+/*for循环,关键字 through 表示包括 end 这个数，而 to 则不包括 end 这个数*/
+
+@for $i from 1 through 3 {
+  .item-#{$i} { width: 2em * $i; }
+}
+
+@for $i from 1 to 3 {
+  .item-#{$i} { width: 2em * $i; }
+}
+
+/*@for应用在网格系统生成各个格子 class 的代码：*/
+
+$grid-prefix: span !default;
+$grid-width: 60px !default;
+$grid-gutter: 20px !default;
+
+%grid {
+  float: left;
+  margin-left: $grid-gutter / 2;
+  margin-right: $grid-gutter / 2;
+}
+@for $i from 1 through 12 {
+  .#{$grid-prefix}#{$i}{
+    width: $grid-width * $i + $grid-gutter * ($i - 1);
+    @extend %grid;
+  }  
+}
+
+/*while循环*/
+$types: 4;
+$type-width: 20px;
+
+@while $types > 0 {
+    .while-#{$types} {
+        width: $type-width + $types;
+    }
+    $types: $types - 1;
+}
+
+/*each循环*/
+//$var 就是一个变量名，<list> 是一个 SassScript 表达式，他将返回一个列表值。
+//变量 $var 会在列表中做遍历，并且遍历出与 $var 对应的样式块
+$list: adam john wynn mason kuroir;//$list 就是一个列表
+
+@mixin author-images {
+    @each $author in $list {
+        .photo-#{$author} {
+            background: url("/images/avatars/#{$author}.png") no-repeat;
+        }
+    }
+}
+
+.author-bio {
+    @include author-images;
+}
+/*unquote函数*/
+.test1 {
+    content:  unquote('Hello Sass!') ;
+}
+.test2 {
+    content: unquote("'Hello Sass!'");
+}
+.test5 {
+    content: unquote('"Hello Sass!"');
+}
+.test6 {
+    content: unquote(Hello Sass);
+}
+
+/*字符串函数-quote()函数*/
+.test1 {
+    content:  quote('Hello Sass!');
+}
+.test2 {
+    content: quote("Hello Sass!");
+}
+
+/*To-upper-case()小转大,To-lower-case()大转小*/
+.test {
+  text: to-lower-case(aA-aAAA-aaa);
+  text: to-upper-case(aA-aAAA-aaa);
+}
+
+/*
+	  percentage($value)：将一个不带单位的数转换成百分比值；
+	  round($value)：将数值四舍五入，转换成一个最接近的整数；
+	  ceil($value)：将大于自己的小数转换成下一位整数；
+	  floor($value)：将一个数去除他的小数部分；
+	  abs($value)：返回一个数的绝对值；
+	  min($numbers…)：找出几个数值之间的最小值；
+	  max($numbers…)：找出几个数值之间的最大值；
+	  random(): 获取随机数
+*/
+.box_04{
+	width : percentage(5px / 10px);
+	width : percentage(.2);
+	width : round(12.3);
+	width : round(2.2%);
+	width : round(1px / 3px);
+	width : ceil(2px / 3px);
+	width : ceil(2.6);
+	width : floor(10.8em);
+	width : floor(10.2px);
+	width : abs(-10);
+	width : min(1,2,1%,3,300%);
+	width : max(1px,5px);
+	width : random();
+
+}
+
+/*
+	1.length($list)：返回一个列表的长度值；
+	length(10px 20px (border 1px solid) 2em)  4
+
+	2.nth($list, $n)：返回一个列表中指定的某个标签值
+	 nth(10px 20px 30px,1)  10px
+
+	3.join($list1, $list2, [$separator])：将两个列给连接在一起，变成一个列表；
+	join((blue,red),(#abc #def))  (#0000ff, #ff0000, #aabbcc, #ddeeff)
+	
+	4.append($list1, $val, [$separator])：将某个值放在列表的最后；
+	append((10px,20px),30px) (10px, 20px, 30px)
+	
+	5.zip($lists…)：将几个列表结合成一个多维的列表；每个单一的列表个数值必须是相同的
+	 zip(1px 2px 3px,solid dashed dotted,green blue red)
+	 ((1px "solid" #008000), (2px "dashed" #0000ff), (3px "dotted" #ff0000))
+	
+	6.index($list, $value)：返回一个值在列表中的位置值。
+	 index(1px solid red, 1px) 1
+*/
+
+/*Maps的函数-map-get($map,$key)*/
+$social-colors: (
+    dribble: #ea4c89,
+    facebook: #3b5998,
+    github: #171515,
+    google: #db4437,
+    twitter: #55acee
+);
+
+.btn-dribble{
+  color: map-get($social-colors,facebook);
+}
+
+/* Maps的函数-map-has-key($map,$key),参数写错了的话会有提示*/
+@function colors($color){
+    @if not map-has-key($social-colors,$color){
+        @warn "No color found for `#{$color}` in $social-colors map. Property omitted.";
+    }
+    @return map-get($social-colors,$color);
+};
+.btn-dribble {
+    color: colors(dribble);
+}
+.btn-facebook {
+    color: colors(facebook);
+}
+.btn-github {
+    color: colors(github);
+}
+.btn-google {
+    color: colors(google);
+}
+.btn-twitter {
+    color: colors(twitter);
+}
+.btn-weibo {
+    color: colors(weibo);
+}
+
+/*map-keys($map)*/
+@function colors($color){
+    $names: map-keys($social-colors);
+    @if not index($names,$color){
+        @warn "Waring: `#{$color} is not a valid color name.`";
+    }
+    @return map-get($social-colors,$color);
+}
+/*weibo 不在 $social-color s中，那么不会编译出 CSS*/
+/*可以通过 @each 或者 @for 遍历出所有值*/
+@each $name in map-keys($social-colors){
+    .btn-#{$name}{
+        color: colors($name);
+    }
+}
+.btn-weibo{
+    color: colors(weibo);
+}
+
+/*@media*/
+.sidebar {
+  width: 300px;
+  @media screen and (orientation: landscape) {
+    width: 500px;
+  }
+}
+/*@media 也可以嵌套 @media：*/
+@media screen {
+  .sidebar {
+    @media (orientation: landscape) {
+      width: 500px;
+    }
+  }
+}
